@@ -12,7 +12,7 @@ FNAME1 = "data/Z__C_RJTD_%Y%m%d%H0000_MSM_GPV_Rjp_Lsurf_FH00-15_grib2.bin"
 # Path to the second GRIB file (+16-33h)
 FNAME2 = "data/Z__C_RJTD_%Y%m%d%H0000_MSM_GPV_Rjp_Lsurf_FH16-33_grib2.bin"
 # Time lag until a forecast becomes availabel (in hours)
-LAG = 1
+LAG = 3
 
 
 def _read_grib(fname, skip=0):
@@ -30,10 +30,8 @@ def _read_grib(fname, skip=0):
         lats, lons = grbs[0].latlons()
 
         # Convert the latitude/longitude of the target point into array indices
-        i = int((args.lat - lats.min()) /
-                ((lats.max() - lats.min()) / lats.shape[0]))
-        j = int((args.lon - lons.min()) /
-                ((lons.max() - lons.min()) / lats.shape[1]))
+        i = int((lats.max() - args.lat) / ((lats.max() - lats.min()) / lats.shape[0]))
+        j = int((args.lon - lons.min()) / ((lons.max() - lons.min()) / lats.shape[1]))
 
         # There are 12 features for each forecast time
         # .select() is slow and should be avoided
@@ -65,10 +63,8 @@ def read_grib(dt):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("output", help="Output file name")
-    parser.add_argument("--lat", type=float,
-                        help="Latitude of target location")
-    parser.add_argument("--lon", type=float,
-                        help="Longitude of target location")
+    parser.add_argument("--lat", type=float, help="Latitude of target location")
+    parser.add_argument("--lon", type=float, help="Longitude of target location")
     parser.add_argument("--start", help="Start date (inclusive)",
                         type=lambda s: datetime.strptime(s, "%Y/%m/%d"))
     parser.add_argument("--end", help="End date (exclusive)",
